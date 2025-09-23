@@ -14,7 +14,7 @@ export async function DELETE(
     try {
       await unlink(filepath);
       return NextResponse.json({ message: 'Image deleted successfully' });
-    } catch (_error) {
+    } catch {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
   } catch (error) {

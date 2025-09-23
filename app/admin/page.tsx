@@ -29,6 +29,7 @@ export default function Admin() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [activePage, setActivePage] = useState('home');
   const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
+  const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
 
@@ -163,24 +164,7 @@ export default function Admin() {
     setIsDragOver(false);
   }, []);
 
-      const handleDrop = useCallback(async (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragOver(false);
-
-        console.log('Drop event triggered');
-        const files = Array.from(e.dataTransfer.files);
-        console.log('Total files dropped:', files.length);
-
-        const imageFiles = files.filter(file => file.type.startsWith('image/'));
-        console.log('Image files:', imageFiles.length);
-
-        for (const file of imageFiles) {
-          console.log('Processing file:', file.name);
-          await uploadImage(file);
-        }
-      }, [uploadImage]);
-
-  const uploadImage = async (file: File) => {
+  const uploadImage = useCallback(async (file: File) => {
     console.log('Starting upload for:', file.name, 'Type:', file.type, 'Size:', file.size);
     const formData = new FormData();
     formData.append('file', file);
@@ -204,7 +188,24 @@ export default function Admin() {
     } catch (error) {
       console.error('Upload failed with error:', error);
     }
-  };
+  }, [fetchImages]);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    console.log('Drop event triggered');
+    const files = Array.from(e.dataTransfer.files);
+    console.log('Total files dropped:', files.length);
+
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    console.log('Image files:', imageFiles.length);
+
+    for (const file of imageFiles) {
+      console.log('Processing file:', file.name);
+      await uploadImage(file);
+    }
+  }, [uploadImage]);
 
   const deleteImage = async (filename: string) => {
     if (!confirm(`Delete "${filename}"?`)) return;
@@ -561,7 +562,7 @@ export default function Admin() {
                         console.log('Drag end event triggered');
                         handleImageDragEnd(e);
                       }}
-                      onMouseDown={(_e) => {
+                      onMouseDown={() => {
                         console.log('Mouse down on draggable div');
                       }}
                       onClick={(e) => {

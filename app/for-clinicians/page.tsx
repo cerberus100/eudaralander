@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, Shield, Settings, Users } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/container";
 import { Section } from "@/components/section";

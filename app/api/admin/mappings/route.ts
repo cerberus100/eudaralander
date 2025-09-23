@@ -12,7 +12,7 @@ export async function GET() {
     try {
       const data = await readFile(MAPPINGS_FILE, 'utf-8');
       return NextResponse.json(JSON.parse(data));
-    } catch (_error) {
+    } catch {
       // Return default mappings if file doesn't exist
           const defaultMappings = {
             hero: {
