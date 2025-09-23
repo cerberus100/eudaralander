@@ -27,7 +27,6 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const timestamp = Date.now();
-    const extension = file.name.split('.').pop();
     const filename = `${timestamp}-${file.name}`;
     const filepath = join(process.cwd(), 'public/images', filename);
 

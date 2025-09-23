@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Container } from "@/components/container";
-import { content } from "@/lib/content";
 
 interface FooterProps {
   platformDisclaimer: string;

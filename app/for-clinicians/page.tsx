@@ -39,12 +39,6 @@ export default function ForClinicians() {
 
   const heroImage = sectionMappings['clinicians-hero']?.images[0] || content.theme.images.hero;
 
-  const features = [
-    { icon: Shield, text: "HIPAA-compliant video and secure messaging" },
-    { icon: Settings, text: "Scheduling, notes, and record-keeping" },
-    { icon: Users, text: "Human-centered design to reduce cognitive load" },
-    { icon: CheckCircle, text: "Your practice, your brand, your availability" },
-  ];
 
   return (
     <div>

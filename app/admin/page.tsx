@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { Upload, Image as ImageIcon, Settings, Eye, Edit, Save, X, Plus, FileText, Home, Users, Stethoscope, Phone, Shield, BookOpen, Play, Pause, RotateCcw } from "lucide-react";
+import { Upload, Image as ImageIcon, Settings, Eye, X, Home, Users, Stethoscope, Phone, Shield, BookOpen, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { content } from "@/lib/content";
@@ -23,19 +23,12 @@ interface SectionMapping {
   };
 }
 
-interface PageData {
-  id: string;
-  title: string;
-  icon: any;
-  url: string;
-}
 
 export default function Admin() {
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [activePage, setActivePage] = useState('home');
   const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
-  const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
 
@@ -170,22 +163,22 @@ export default function Admin() {
     setIsDragOver(false);
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
+      const handleDrop = useCallback(async (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(false);
 
-    console.log('Drop event triggered');
-    const files = Array.from(e.dataTransfer.files);
-    console.log('Total files dropped:', files.length);
+        console.log('Drop event triggered');
+        const files = Array.from(e.dataTransfer.files);
+        console.log('Total files dropped:', files.length);
 
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    console.log('Image files:', imageFiles.length);
+        const imageFiles = files.filter(file => file.type.startsWith('image/'));
+        console.log('Image files:', imageFiles.length);
 
-    for (const file of imageFiles) {
-      console.log('Processing file:', file.name);
-      await uploadImage(file);
-    }
-  }, []);
+        for (const file of imageFiles) {
+          console.log('Processing file:', file.name);
+          await uploadImage(file);
+        }
+      }, [uploadImage]);
 
   const uploadImage = async (file: File) => {
     console.log('Starting upload for:', file.name, 'Type:', file.type, 'Size:', file.size);
@@ -568,7 +561,7 @@ export default function Admin() {
                         console.log('Drag end event triggered');
                         handleImageDragEnd(e);
                       }}
-                      onMouseDown={(e) => {
+                      onMouseDown={(_e) => {
                         console.log('Mouse down on draggable div');
                       }}
                       onClick={(e) => {
@@ -919,7 +912,7 @@ export default function Admin() {
                 <div className="border border-warm-gray/30 rounded-lg p-4">
                   <h3 className="font-semibold text-foreground mb-3">Legal Pages</h3>
                   <div className="text-center text-foreground/70 bg-background/50 rounded-lg p-8">
-                    <p className="text-lg">Legal pages don't require images</p>
+                    <p className="text-lg">Legal pages don&apos;t require images</p>
                     <p className="text-sm mt-2">These are text-only pages (Privacy Policy, Terms of Use, etc.)</p>
                   </div>
                 </div>
