@@ -1,0 +1,61 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer glow ring -->
+  <circle cx="100" cy="100" r="90" fill="url(#outerGlow)" filter="url(#blur)"/>
+
+  <!-- Main circle background with gradient -->
+  <circle cx="100" cy="100" r="80" fill="url(#mainGradient)"/>
+
+  <!-- Inner accent ring -->
+  <circle cx="100" cy="100" r="70" fill="none" stroke="url(#goldGradient)" stroke-width="3" opacity="0.8"/>
+
+  <!-- Inner ring for depth -->
+  <circle cx="100" cy="100" r="65" fill="none" stroke="url(#innerRing)" stroke-width="1" opacity="0.3"/>
+
+  <!-- Text background circle for better readability -->
+  <circle cx="100" cy="100" r="55" fill="rgba(46,59,45,0.1)"/>
+
+  <!-- Text -->
+  <text x="100" y="115" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="24" font-weight="400" fill="url(#textGradient)" text-anchor="middle" letter-spacing="0.5px">eudaura</text>
+
+  <!-- Subtle inner highlight -->
+  <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+  <!-- Gradients and filters -->
+  <defs>
+    <!-- Outer glow gradient -->
+    <radialGradient id="outerGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="rgba(199,168,103,0.3)"/>
+      <stop offset="70%" stop-color="rgba(199,168,103,0.1)"/>
+      <stop offset="100%" stop-color="rgba(199,168,103,0)"/>
+    </radialGradient>
+
+    <!-- Main circle gradient -->
+    <radialGradient id="mainGradient" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#5A6F53"/>
+      <stop offset="100%" stop-color="#4A5D47"/>
+    </radialGradient>
+
+    <!-- Gold gradient for ring -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D4B876"/>
+      <stop offset="100%" stop-color="#C7A867"/>
+    </linearGradient>
+
+    <!-- Inner ring gradient -->
+    <linearGradient id="innerRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.2)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.05)"/>
+    </linearGradient>
+
+    <!-- Text gradient -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2E3B2D"/>
+      <stop offset="100%" stop-color="#3E4B3D"/>
+    </linearGradient>
+
+    <!-- Blur filter for glow effect -->
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+    </filter>
+  </defs>
+</svg>

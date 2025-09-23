@@ -1,0 +1,60 @@
+{
+  "hero": {
+    "title": "Home Hero Section",
+    "images": [
+      "/images/1758654157534-ChatGPT Image Sep 23, 2025, 12_02_31 PM.png"
+    ],
+    "content": "The future of medicine is presence.",
+    "editable": false
+  },
+  "how-it-works-0": {
+    "title": "Connect Icon",
+    "images": [],
+    "content": "",
+    "editable": false
+  },
+  "how-it-works-1": {
+    "title": "Consult Icon",
+    "images": [],
+    "content": "",
+    "editable": false
+  },
+  "how-it-works-2": {
+    "title": "Care Plan Icon",
+    "images": [],
+    "content": "",
+    "editable": false
+  },
+  "patients-hero": {
+    "title": "For Patients Hero",
+    "images": [
+      "/images/1758651818760-ChatGPT Image Sep 23, 2025, 11_23_03 AM.png"
+    ],
+    "content": "Care for everyday life",
+    "editable": false
+  },
+  "clinicians-hero": {
+    "title": "For Clinicians Hero",
+    "images": [
+      "/images/1758656875448-ChatGPT Image Sep 23, 2025, 12_47_46 PM.png"
+    ],
+    "content": "Built for providers who care",
+    "editable": false
+  },
+  "howitworks-hero": {
+    "title": "How It Works Hero",
+    "images": [
+      "/images/1758654157534-ChatGPT Image Sep 23, 2025, 12_02_31 PM.png"
+    ],
+    "content": "From question to care in minutes",
+    "editable": false
+  },
+  "contact-hero": {
+    "title": "Contact Hero",
+    "images": [
+      "/images/1758607221839-eudara.png"
+    ],
+    "content": "Get in Touch",
+    "editable": false
+  }
+}
