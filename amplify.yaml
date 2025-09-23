@@ -3,7 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - npm ci --cache .npm --prefer-offline
     build:
       commands:
         - npm run build
@@ -16,24 +16,18 @@ frontend:
       - node_modules/**/*
       - .next/cache/**/*
 
-# Production environment variables
+# Environment variables
 environmentVariables:
-  - NODE_ENV=production
-  - NEXT_PUBLIC_APP_ENV=production
+  NODE_ENV=production
+  NEXT_PUBLIC_APP_ENV=production
 
-# Build settings
-build:
-  baseDirectory: ''
-  buildCommand: npm run build
-  publishDirectory: .next
-
-# Branch settings
+# Branch-specific environment variables
 branches:
   main:
     environmentVariables:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_APP_ENV=production
+      NODE_ENV=production
+      NEXT_PUBLIC_APP_ENV=production
   development:
     environmentVariables:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_APP_ENV=development
+      NODE_ENV=development
+      NEXT_PUBLIC_APP_ENV=development
