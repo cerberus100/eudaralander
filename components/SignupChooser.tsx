@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { X, Users, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 
 interface SignupChooserProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ export function SignupChooser({ isOpen, onClose }: SignupChooserProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl bg-background border border-warm-gray/30">
+        <DialogClose onClose={onClose} />
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif text-foreground text-center">
             How would you like to get started?
