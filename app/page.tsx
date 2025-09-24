@@ -6,7 +6,6 @@ import { LoadingSkeleton } from "@/components/ui/loading";
 import { content } from "@/lib/content";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 interface SectionMapping {
   [key: string]: {
@@ -76,7 +75,6 @@ export default function Home() {
                   priority={true}
                 />
               )}
-              </div>
             </div>
           </div>
         </Container>
