@@ -1,8 +1,23 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import type { DragEvent } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Upload, Image as ImageIcon, Settings, Eye, X, Home, Users, Stethoscope, Phone, Shield, BookOpen, RotateCcw } from "lucide-react";
+import {
+  Upload,
+  Image as ImageIcon,
+  Settings,
+  Eye,
+  X,
+  Home,
+  Users,
+  Stethoscope,
+  Phone,
+  Shield,
+  BookOpen,
+  RotateCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { content } from "@/lib/content";
@@ -29,29 +44,9 @@ export default function Admin() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [activePage, setActivePage] = useState('home');
   const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
-  const [draggedImage, setDraggedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-
-  useEffect(() => {
-    fetchImages();
-    fetchMappings();
-  }, []);
-
-  // Clear dragged image state on mount and when window loses focus
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setDraggedImage(null);
-        setIsDragging(false);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/images');
       if (response.ok) {
@@ -61,9 +56,9 @@ export default function Admin() {
     } catch (error) {
       console.error('Failed to fetch images:', error);
     }
-  };
+  }, []);
 
-  const fetchMappings = async () => {
+  const fetchMappings = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/mappings');
       if (response.ok) {
@@ -96,8 +91,8 @@ export default function Admin() {
             content: '',
             editable: false
           },
-          'patients-hero': {
-            title: 'For Patients Hero',
+          patients: {
+            title: 'Care for everyday life',
             images: [],
             content: 'Care for everyday life',
             editable: false
@@ -152,20 +147,51 @@ export default function Admin() {
         }
       });
     }
-  };
+  }, []);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const saveMappings = useCallback(async (mappings: SectionMapping) => {
+    try {
+      await fetch('/api/admin/mappings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(mappings),
+      });
+    } catch (error) {
+      console.error('Failed to save mappings:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchImages();
+    fetchMappings();
+  }, [fetchImages, fetchMappings]);
+
+  // Clear dragged image state on mount and when window loses focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsDragging(false);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+
+  const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(true);
   }, []);
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const handleDragLeave = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(false);
   }, []);
 
   const uploadImage = useCallback(async (file: File) => {
-    console.log('Starting upload for:', file.name, 'Type:', file.type, 'Size:', file.size);
     const formData = new FormData();
     formData.append('file', file);
 
@@ -175,34 +201,24 @@ export default function Admin() {
         body: formData,
       });
 
-      console.log('Upload response status:', response.status);
-      const result = await response.json();
-      console.log('Upload response:', result);
-
-      if (response.ok) {
-        console.log('Upload successful, refreshing images...');
-        await fetchImages(); // Refresh the image list
-      } else {
-        console.error('Upload failed with response:', result);
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result?.error ?? 'Upload failed');
       }
+
+      await fetchImages();
     } catch (error) {
-      console.error('Upload failed with error:', error);
+      console.error('Upload failed:', error);
     }
   }, [fetchImages]);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
+  const handleDrop = useCallback(async (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(false);
 
-    console.log('Drop event triggered');
-    const files = Array.from(e.dataTransfer.files);
-    console.log('Total files dropped:', files.length);
+    const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
 
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    console.log('Image files:', imageFiles.length);
-
-    for (const file of imageFiles) {
-      console.log('Processing file:', file.name);
+    for (const file of files) {
       await uploadImage(file);
     }
   }, [uploadImage]);
@@ -227,32 +243,35 @@ export default function Admin() {
     }
   };
 
-  const cleanMappingsOfDeletedImage = async (deletedImageUrl: string) => {
-    const updatedMappings = { ...sectionMappings };
+  const cleanMappingsOfDeletedImage = useCallback(async (deletedImageUrl: string) => {
+    let updatedMappings: SectionMapping | null = null;
 
-    // Remove the deleted image from all sections
-    Object.keys(updatedMappings).forEach(sectionKey => {
-      if (updatedMappings[sectionKey].images.includes(deletedImageUrl)) {
-        updatedMappings[sectionKey].images = updatedMappings[sectionKey].images.filter(
-          image => image !== deletedImageUrl
-        );
+    setSectionMappings((previous) => {
+      let hasChanges = false;
+
+      const nextEntries = Object.entries(previous).map(([key, section]) => {
+        const filteredImages = section.images.filter((image) => image !== deletedImageUrl);
+        if (filteredImages.length !== section.images.length) {
+          hasChanges = true;
+          return [key, { ...section, images: filteredImages }];
+        }
+        return [key, section];
+      });
+
+      if (!hasChanges) {
+        updatedMappings = null;
+        return previous;
       }
+
+      const nextMappings = Object.fromEntries(nextEntries) as SectionMapping;
+      updatedMappings = nextMappings;
+      return nextMappings;
     });
 
-    setSectionMappings(updatedMappings);
-
-    try {
-      await fetch('/api/admin/mappings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedMappings),
-      });
-    } catch (error) {
-      console.error('Failed to update mappings after image deletion:', error);
+    if (updatedMappings) {
+      await saveMappings(updatedMappings);
     }
-  };
+  }, [saveMappings]);
 
   const deleteAllImages = async () => {
     if (!confirm('Delete ALL images? This will also clear all section assignments.')) return;
@@ -269,27 +288,22 @@ export default function Admin() {
       }
 
       // Clear all section mappings
-      const clearedMappings = Object.keys(sectionMappings).reduce((acc, key) => {
-        acc[key] = {
-          ...sectionMappings[key],
-          images: []
-        };
-        return acc;
-      }, {} as SectionMapping);
+      let clearedMappings: SectionMapping | null = null;
+      setSectionMappings((previous) => {
+        const nextMappings = Object.fromEntries(
+          Object.entries(previous).map(([key, section]) => [
+            key,
+            { ...section, images: [] },
+          ])
+        ) as SectionMapping;
 
-      setSectionMappings(clearedMappings);
+        clearedMappings = nextMappings;
+        return nextMappings;
+      });
+
       setImages([]);
-
-      try {
-        await fetch('/api/admin/mappings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(clearedMappings),
-        });
-      } catch (error) {
-        console.error('Failed to clear mappings:', error);
+      if (clearedMappings) {
+        await saveMappings(clearedMappings);
       }
     } catch (error) {
       console.error('Failed to delete all images:', error);
@@ -304,11 +318,7 @@ export default function Admin() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleImageDragStart = (e: React.DragEvent, imageUrl: string) => {
-    console.log('🚀 Drag started:', imageUrl);
-    console.log('🎯 Event target:', e.target);
-
-    setDraggedImage(imageUrl);
+  const handleImageDragStart = (e: DragEvent<HTMLDivElement>, imageUrl: string) => {
     setIsDragging(true);
 
     // Set drag properties
@@ -316,109 +326,101 @@ export default function Admin() {
     e.dataTransfer.setData('text/plain', imageUrl);
 
     // Set custom drag image
-    const img = e.target as HTMLImageElement;
-    if (img && img.src) {
-      e.dataTransfer.setDragImage(img, img.width / 2, img.height / 2);
-      console.log('🖼️ Drag image set:', img.src);
+    const imgElement = e.currentTarget.querySelector('img');
+    if (imgElement) {
+      e.dataTransfer.setDragImage(imgElement, imgElement.width / 2, imgElement.height / 2);
     }
-
-    console.log('✅ Drag setup completed');
   };
 
-  const handleImageDragEnd = (e: React.DragEvent) => {
-    console.log('🛑 Drag ended');
-    console.log('📍 Drop effect:', e.dataTransfer.dropEffect);
-    setDraggedImage(null);
+  const handleImageDragEnd = (e: DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.clearData();
     setIsDragging(false);
   };
 
-  const handleSectionDrop = async (e: React.DragEvent, sectionKey: string) => {
+  const handleSectionDrop = (e: DragEvent<HTMLDivElement>, sectionKey: string) => {
     e.preventDefault();
     e.stopPropagation();
 
-    console.log('🎯 Section drop triggered for:', sectionKey);
-    console.log('📊 Data types available:', e.dataTransfer.types);
-    console.log('📝 Text data:', e.dataTransfer.getData('text/plain'));
-
     const imageUrl = e.dataTransfer.getData('text/plain');
-    console.log('📸 Drop received:', imageUrl, 'on section:', sectionKey);
 
     if (!imageUrl) {
-      console.log('❌ No image URL found in drop data');
+      setIsDragging(false);
       return;
     }
 
-    // Prevent duplicate images in the same section
-    if (sectionMappings[sectionKey]?.images?.includes(imageUrl)) {
-      return;
-    }
+    let updatedMappings: SectionMapping | null = null;
+    setSectionMappings((previous) => {
+      const currentSection = previous[sectionKey] ?? {
+        title: sectionKey,
+        images: [],
+        content: '',
+        editable: false,
+      };
 
-    const updatedMappings = {
-      ...sectionMappings,
-      [sectionKey]: {
-        ...sectionMappings[sectionKey],
-        images: [...(sectionMappings[sectionKey]?.images || []), imageUrl]
+      if (currentSection.images.includes(imageUrl)) {
+        return previous;
       }
-    };
 
-    setSectionMappings(updatedMappings);
-    setDraggedImage(null);
+      const nextMappings: SectionMapping = {
+        ...previous,
+        [sectionKey]: {
+          ...currentSection,
+          images: [...currentSection.images, imageUrl],
+        },
+      };
+
+      updatedMappings = nextMappings;
+      return nextMappings;
+    });
+
     setIsDragging(false);
 
-    try {
-      await fetch('/api/admin/mappings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedMappings),
-      });
-    } catch (error) {
-      console.error('Failed to save mappings:', error);
+    if (updatedMappings) {
+      void saveMappings(updatedMappings);
     }
   };
 
-  const handleSectionDragOver = (e: React.DragEvent) => {
+  const handleSectionDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'copy';
-    console.log('🎯 Section drag over - copy effect set');
   };
 
-  const handleSectionDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('🎯 Section drag enter - drop zone activated');
-  };
-
-  const handleSectionDragLeave = (e: React.DragEvent) => {
+  const handleSectionDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const removeImageFromVisualSection = async (sectionKey: string) => {
-    const updatedMappings = {
-      ...sectionMappings,
-      [sectionKey]: {
-        ...sectionMappings[sectionKey],
-        images: []
+  const handleSectionDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const removeImageFromVisualSection = useCallback(async (sectionKey: string) => {
+    let updatedMappings: SectionMapping | null = null;
+
+    setSectionMappings((previous) => {
+      const section = previous[sectionKey];
+      if (!section || section.images.length === 0) {
+        return previous;
       }
-    };
 
-    setSectionMappings(updatedMappings);
-
-    try {
-      await fetch('/api/admin/mappings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const nextMappings: SectionMapping = {
+        ...previous,
+        [sectionKey]: {
+          ...section,
+          images: [],
         },
-        body: JSON.stringify(updatedMappings),
-      });
-    } catch (error) {
-      console.error('Failed to save mappings:', error);
+      };
+
+      updatedMappings = nextMappings;
+      return nextMappings;
+    });
+
+    if (updatedMappings) {
+      await saveMappings(updatedMappings);
     }
-  };
+  }, [saveMappings]);
 
 
   const pages = [
@@ -552,28 +554,17 @@ export default function Admin() {
                   {images.map((image) => (
                     <div
                       key={`${image.name}-${image.lastModified}`}
-                      className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg overflow-hidden shadow-lg group cursor-move hover:scale-105 transition-all duration-300 relative"
+                      className="relative aspect-square bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg overflow-hidden shadow-lg group cursor-move hover:scale-105 transition-all duration-300"
                       draggable="true"
-                      onDragStart={(e) => {
-                        console.log('Drag start event triggered for:', image.url);
-                        handleImageDragStart(e, image.url);
-                      }}
-                      onDragEnd={(e) => {
-                        console.log('Drag end event triggered');
-                        handleImageDragEnd(e);
-                      }}
-                      onMouseDown={() => {
-                        console.log('Mouse down on draggable div');
-                      }}
-                      onClick={(e) => {
-                        console.log('Click on draggable div - this should not happen during drag');
-                        e.preventDefault();
-                      }}
+                      onDragStart={(event) => handleImageDragStart(event, image.url)}
+                      onDragEnd={handleImageDragEnd}
                     >
-                      <img
+                      <Image
                         src={image.url}
                         alt={image.name}
-                        className="w-full h-full object-cover select-none pointer-events-none"
+                        fill
+                        className="object-cover select-none pointer-events-none"
+                        sizes="(max-width: 1024px) 50vw, 16vw"
                       />
                       {/* Delete button */}
                       <button
@@ -642,10 +633,12 @@ export default function Admin() {
                     >
                       {sectionMappings.hero?.images[0] ? (
                         <>
-                          <img
+                          <Image
                             src={sectionMappings.hero.images[0]}
                             alt="Hero image"
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
                           />
                           <button
                             onClick={() => removeImageFromVisualSection('hero')}
@@ -694,10 +687,12 @@ export default function Admin() {
                             onDragLeave={handleSectionDragLeave}
                           >
                             {sectionMappings[step.key]?.images[0] ? (
-                              <img
+                              <Image
                                 src={sectionMappings[step.key].images[0]}
                                 alt={`${step.title} icon`}
-                                className="w-8 h-8 object-cover rounded"
+                                width={32}
+                                height={32}
+                                className="object-cover rounded"
                               />
                             ) : (
                               <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -738,10 +733,12 @@ export default function Admin() {
                   >
                     {sectionMappings['patients-hero']?.images[0] ? (
                       <>
-                        <img
+                        <Image
                           src={sectionMappings['patients-hero'].images[0]}
                           alt="For Patients hero image"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                         <button
                           onClick={() => removeImageFromVisualSection('patients-hero')}
@@ -787,10 +784,12 @@ export default function Admin() {
                   >
                     {sectionMappings['clinicians-hero']?.images[0] ? (
                       <>
-                        <img
+                        <Image
                           src={sectionMappings['clinicians-hero'].images[0]}
                           alt="For Clinicians hero image"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                         <button
                           onClick={() => removeImageFromVisualSection('clinicians-hero')}
@@ -835,20 +834,22 @@ export default function Admin() {
                     onDragLeave={handleSectionDragLeave}
                   >
                     {sectionMappings['howitworks-hero']?.images[0] ? (
-                      <>
-                        <img
-                          src={sectionMappings['howitworks-hero'].images[0]}
-                          alt="How It Works hero image"
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          onClick={() => removeImageFromVisualSection('howitworks-hero')}
-                          className="absolute top-4 right-4 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm opacity-0 hover:opacity-100 transition-all duration-300 hover:scale-110"
-                          title="Remove from section"
-                        >
-                          ×
-                        </button>
-                      </>
+                        <>
+                          <Image
+                            src={sectionMappings['howitworks-hero'].images[0]}
+                            alt="How It Works hero image"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
+                          />
+                          <button
+                            onClick={() => removeImageFromVisualSection('howitworks-hero')}
+                            className="absolute top-4 right-4 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm opacity-0 hover:opacity-100 transition-all duration-300 hover:scale-110"
+                            title="Remove from section"
+                          >
+                            ×
+                          </button>
+                        </>
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-foreground/50">
                         <ImageIcon className="w-16 h-16 mb-4" />
@@ -885,10 +886,12 @@ export default function Admin() {
                   >
                     {sectionMappings['contact-hero']?.images[0] ? (
                       <>
-                        <img
+                        <Image
                           src={sectionMappings['contact-hero'].images[0]}
                           alt="Contact hero image"
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                         <button
                           onClick={() => removeImageFromVisualSection('contact-hero')}
