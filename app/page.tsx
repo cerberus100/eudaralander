@@ -1,8 +1,11 @@
 "use client";
 
 import { Container } from "@/components/container";
+import { HeroMedia } from "@/components/hero-media";
+import { LoadingSkeleton } from "@/components/ui/loading";
 import { content } from "@/lib/content";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface SectionMapping {
   [key: string]: {
@@ -16,6 +19,7 @@ interface SectionMapping {
 export default function Home() {
   const { home } = content;
   const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
+  const [isLoadingImages, setIsLoadingImages] = useState(true);
 
   useEffect(() => {
     fetchMappings();
@@ -30,6 +34,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Failed to fetch mappings:', error);
+    } finally {
+      setIsLoadingImages(false);
     }
   };
 
@@ -59,12 +65,15 @@ export default function Home() {
               </div>
             </div>
             <div className="relative">
-              <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 shadow-2xl">
-                <img
-                  src={heroImage}
-                  alt="Healthcare professionals providing care"
-                  className="w-full h-full object-cover"
+              {isLoadingImages ? (
+                <LoadingSkeleton className="aspect-[4/3] rounded-3xl" />
+              ) : (
+                <HeroMedia
+                  imageSrc={heroImage}
+                  imageAlt="Healthcare professionals providing care"
+                  priority={true}
                 />
+              )}
               </div>
             </div>
           </div>

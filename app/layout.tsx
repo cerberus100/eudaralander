@@ -62,12 +62,17 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} antialiased font-sans bg-gradient-to-br from-gray-50 via-white to-gray-50`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+      </head>
+      <body className={`${inter.variable} antialiased font-sans bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen`}>
         <Navbar
           items={content.nav.items}
           cta={content.nav.cta}
         />
-        <main>{children}</main>
+        <main className="flex-1">{children}</main>
         <Footer
           platformDisclaimer={content.brand.platformDisclaimer}
           privacyHref="/privacy"
