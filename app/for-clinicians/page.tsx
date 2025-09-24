@@ -7,6 +7,7 @@ import { Section } from "@/components/section";
 import { HeroMedia } from "@/components/hero-media";
 import { content } from "@/lib/content";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface SectionMapping {
   [key: string]: {
@@ -20,6 +21,7 @@ interface SectionMapping {
 export default function ForClinicians() {
   const { clinicians } = content;
   const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
+  const router = useRouter();
 
   useEffect(() => {
     fetchMappings();
@@ -39,9 +41,25 @@ export default function ForClinicians() {
 
   const heroImage = sectionMappings['clinicians-hero']?.images[0] || content.theme.images.hero;
 
-
   return (
     <div>
+      {/* Inline CTA Banner */}
+      <section className="bg-primary/5 border-b border-primary/20">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Ready to join our network?</h2>
+              <p className="text-sm text-foreground/70">Apply to become an independent clinician on Eudaura</p>
+            </div>
+            <Button
+              onClick={() => router.push('/signup/clinician')}
+              className="btn-primary"
+            >
+              Apply as Clinician
+            </Button>
+          </div>
+        </div>
+      </section>
       {/* Hero Section */}
       <section className="py-20 sm:py-32 lg:py-40 relative overflow-hidden">
         <Container>
