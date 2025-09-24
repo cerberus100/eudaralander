@@ -15,7 +15,7 @@ export default function ClinicianThankYou() {
             Thank You for Your Application!
           </h1>
           <p className="text-xl text-foreground/70 max-w-2xl mx-auto">
-            We've received your application to join the Eudaura network. Our team will review your credentials and contact you within 2-3 business days.
+            We&apos;ve received your application to join the Eudaura network. Our team will review your credentials and contact you within 2-3 business days.
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function ClinicianThankYou() {
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">Invite</h3>
                 <p className="text-sm text-foreground/70">
-                  You'll receive an email invitation to activate your account
+                  You&apos;ll receive an email invitation to activate your account
                 </p>
               </div>
             </div>
@@ -63,7 +63,7 @@ export default function ClinicianThankYou() {
             <div className="bg-primary/5 rounded-lg p-6 text-center">
               <h4 className="font-semibold text-foreground mb-2">Questions?</h4>
               <p className="text-sm text-foreground/70 mb-4">
-                If you have any questions about your application or the process, please don't hesitate to reach out.
+                If you have any questions about your application or the process, please don&apos;t hesitate to reach out.
               </p>
               <Button variant="outline" className="btn-secondary">
                 <a href="mailto:provider@eudaura.com">Contact Provider Support</a>

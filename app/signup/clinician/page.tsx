@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 const clinicianSchema = z.object({
@@ -100,7 +99,7 @@ export default function ClinicianSignup() {
         throw new Error(error.error || 'Failed to submit application');
       }
 
-      const result = await response.json();
+      await response.json();
 
       toast.success("Application submitted successfully!", {
         description: "We'll review your credentials and email you an invite to activate your account.",

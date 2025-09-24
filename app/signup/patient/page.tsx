@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 const patientSchema = z.object({
@@ -166,7 +165,7 @@ export default function PatientSignup() {
         throw new Error(error.error || 'Failed to submit form');
       }
 
-      const result = await response.json();
+      await response.json();
 
       toast.success("Account created successfully!", {
         description: "We've sent a verification code to your " + (data.preferredContact === "email" ? "email" : "phone"),
@@ -192,7 +191,7 @@ export default function PatientSignup() {
             Create Patient Account
           </h1>
           <p className="text-foreground/70">
-            We'll send a verification code to confirm your account
+            We&apos;ll send a verification code to confirm your account
           </p>
         </div>
 
