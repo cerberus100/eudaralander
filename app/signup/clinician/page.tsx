@@ -61,8 +61,35 @@ const specialties = [
 ];
 
 export default function ClinicianSignup() {
+  const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+
+  const steps = [
+    { id: 1, title: "Identity", description: "Personal information" },
+    { id: 2, title: "Licenses", description: "State licenses" },
+    { id: 3, title: "Documents", description: "Upload credentials" },
+    { id: 4, title: "Clinical", description: "Specialties & flags" },
+  ];
+
+  const totalSteps = steps.length;
+
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const canProceedToNextStep = () => {
+    // Basic validation - in a real app, you'd validate the current step's fields
+    return true;
+  };
 
   const form = useForm<ClinicianFormData>({
     resolver: zodResolver(clinicianSchema),
@@ -128,6 +155,46 @@ export default function ClinicianSignup() {
           </p>
         </div>
 
+        {/* Step Indicator */}
+        <div className="mb-8">
+          <div className="flex justify-center">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                    step.id === currentStep
+                      ? 'bg-primary text-primary-foreground'
+                      : step.id < currentStep
+                      ? 'bg-green-500 text-white'
+                      : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {step.id < currentStep ? (
+                    <CheckCircle className="w-5 h-5" />
+                  ) : (
+                    step.id
+                  )}
+                </div>
+                {index < steps.length - 1 && (
+                  <div
+                    className={`w-8 h-0.5 mx-2 ${
+                      step.id < currentStep ? 'bg-green-500' : 'bg-muted'
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-4">
+            <h2 className="text-lg font-semibold text-foreground">
+              Step {currentStep}: {steps[currentStep - 1]?.title}
+            </h2>
+            <p className="text-sm text-foreground/70">
+              {steps[currentStep - 1]?.description}
+            </p>
+          </div>
+        </div>
+
         <Card className="card-premium">
           <CardHeader>
             <CardTitle>Clinician Application</CardTitle>
@@ -138,215 +205,318 @@ export default function ClinicianSignup() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {/* Personal Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Personal Information</h3>
-                  <div className="grid md:grid-cols-2 gap-6">
+                {/* Step 1: Identity */}
+                {currentStep === 1 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold">Personal Information</h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="fullName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Dr. Jane Smith" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email Address *</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="doctor@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     <FormField
                       control={form.control}
-                      name="fullName"
+                      name="phone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Full Name *</FormLabel>
+                          <FormLabel>Phone Number *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Dr. Jane Smith" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address *</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="doctor@example.com" {...field} />
+                            <Input type="tel" placeholder="(555) 123-4567" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number *</FormLabel>
-                        <FormControl>
-                          <Input type="tel" placeholder="(555) 123-4567" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                )}
 
-                {/* Professional Information */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Professional Information</h3>
-                  <div className="grid md:grid-cols-2 gap-6">
+                {/* Step 2: Licenses */}
+                {currentStep === 2 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold">State Licenses</h3>
+                    <p className="text-sm text-foreground/70">
+                      Add all states where you hold active medical licenses
+                    </p>
+
                     <FormField
                       control={form.control}
-                      name="npi"
+                      name="states"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>NPI Number *</FormLabel>
+                          <FormLabel>States Licensed to Practice *</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="1234567890"
-                              maxLength={10}
-                              {...field}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '');
-                                field.onChange(value);
-                              }}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-64 overflow-y-auto border border-warm-gray/30 rounded-md p-4">
+                              {usStates.map((state) => (
+                                <div key={state} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`state-${state}`}
+                                    checked={field.value?.includes(state)}
+                                    onChange={(e) => {
+                                      const currentStates = field.value || [];
+                                      if (e.target.checked) {
+                                        field.onChange([...currentStates, state]);
+                                      } else {
+                                        field.onChange(currentStates.filter(s => s !== state));
+                                      }
+                                    }}
+                                    className="rounded border-warm-gray/30 text-primary focus:ring-primary"
+                                  />
+                                  <label htmlFor={`state-${state}`} className="text-sm">
+                                    {state}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {/* Step 3: Documents */}
+                {currentStep === 3 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold">Document Uploads</h3>
+                    <div className="bg-primary/5 rounded-lg p-6">
+                      <div className="flex items-center mb-4">
+                        <Upload className="w-6 h-6 text-primary mr-3" />
+                        <h4 className="font-semibold">Upload Required Documents</h4>
+                      </div>
+                      <p className="text-sm text-foreground/70 mb-6">
+                        Please upload clear photos or PDFs of your credentials. Accepted formats: PDF, PNG, JPG (max 10MB each)
+                      </p>
+
+                      <div className="space-y-4">
+                        <div className="border border-warm-gray/30 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-medium">Primary State License *</h5>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => document.getElementById('license-upload')?.click()}
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Upload
+                            </Button>
+                          </div>
+                          <p className="text-sm text-foreground/60">Upload your primary state medical license</p>
+                          <input
+                            id="license-upload"
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+
+                              try {
+                                const { url, key } = await fetch('/api/uploads/presign', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    filename: file.name,
+                                    contentType: file.type,
+                                  }),
+                                }).then(res => res.json());
+
+                                await fetch(url, {
+                                  method: 'PUT',
+                                  body: file,
+                                });
+
+                                form.setValue('documents.malpracticeKey', key);
+                              } catch (error) {
+                                console.error('Upload error:', error);
+                              }
+                            }}
+                          />
+                        </div>
+
+                        <div className="border border-warm-gray/30 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h5 className="font-medium">Malpractice Insurance</h5>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => document.getElementById('malpractice-upload')?.click()}
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Upload
+                            </Button>
+                          </div>
+                          <p className="text-sm text-foreground/60">Upload your current malpractice insurance certificate</p>
+                          <input
+                            id="malpractice-upload"
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            className="hidden"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+
+                              try {
+                                const { url, key } = await fetch('/api/uploads/presign', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    filename: file.name,
+                                    contentType: file.type,
+                                  }),
+                                }).then(res => res.json());
+
+                                await fetch(url, {
+                                  method: 'PUT',
+                                  body: file,
+                                });
+
+                                form.setValue('documents.malpracticeKey', key);
+                              } catch (error) {
+                                console.error('Upload error:', error);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 4: Clinical & Billing Flags */}
+                {currentStep === 4 && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold">Clinical Information</h3>
+
+                    <FormField
+                      control={form.control}
+                      name="specialties"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Specialties *</FormLabel>
+                          <FormControl>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-warm-gray/30 rounded-md p-4">
+                              {specialties.map((specialty) => (
+                                <div key={specialty} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`specialty-${specialty}`}
+                                    checked={field.value?.includes(specialty)}
+                                    onChange={(e) => {
+                                      const currentSpecialties = field.value || [];
+                                      if (e.target.checked) {
+                                        field.onChange([...currentSpecialties, specialty]);
+                                      } else {
+                                        field.onChange(currentSpecialties.filter(s => s !== specialty));
+                                      }
+                                    }}
+                                    className="rounded border-warm-gray/30 text-primary focus:ring-primary"
+                                  />
+                                  <label htmlFor={`specialty-${specialty}`} className="text-sm">
+                                    {specialty}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Consent */}
+                    <FormField
+                      control={form.control}
+                      name="consent"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
                             />
                           </FormControl>
-                          <FormMessage />
-                          <p className="text-sm text-foreground/60">10-digit National Provider Identifier</p>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="licenseNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>License Number *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your medical license number" {...field} />
-                          </FormControl>
-                          <FormMessage />
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              I agree to the{" "}
+                              <a href="/terms" className="text-primary hover:underline" target="_blank">
+                                Terms of Service
+                              </a>{" "}
+                              and{" "}
+                              <a href="/privacy" className="text-primary hover:underline" target="_blank">
+                                HIPAA Notice
+                              </a>{" *"}
+                            </FormLabel>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
                   </div>
-                </div>
+                )}
 
-                {/* States and Specialties */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Practice Information</h3>
-
-                  <FormField
-                    control={form.control}
-                    name="states"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>States Licensed to Practice *</FormLabel>
-                        <FormControl>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto border border-warm-gray/30 rounded-md p-4">
-                            {usStates.map((state) => (
-                              <div key={state} className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id={`state-${state}`}
-                                  checked={field.value?.includes(state)}
-                                  onChange={(e) => {
-                                    const currentStates = field.value || [];
-                                    if (e.target.checked) {
-                                      field.onChange([...currentStates, state]);
-                                    } else {
-                                      field.onChange(currentStates.filter(s => s !== state));
-                                    }
-                                  }}
-                                  className="rounded border-warm-gray/30 text-primary focus:ring-primary"
-                                />
-                                <label htmlFor={`state-${state}`} className="text-sm">
-                                  {state}
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="specialties"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Specialties *</FormLabel>
-                        <FormControl>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-warm-gray/30 rounded-md p-4">
-                            {specialties.map((specialty) => (
-                              <div key={specialty} className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id={`specialty-${specialty}`}
-                                  checked={field.value?.includes(specialty)}
-                                  onChange={(e) => {
-                                    const currentSpecialties = field.value || [];
-                                    if (e.target.checked) {
-                                      field.onChange([...currentSpecialties, specialty]);
-                                    } else {
-                                      field.onChange(currentSpecialties.filter(s => s !== specialty));
-                                    }
-                                  }}
-                                  className="rounded border-warm-gray/30 text-primary focus:ring-primary"
-                                />
-                                <label htmlFor={`specialty-${specialty}`} className="text-sm">
-                                  {specialty}
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* Consent */}
-                <FormField
-                  control={form.control}
-                  name="consent"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          I agree to the{" "}
-                          <a href="/terms" className="text-primary hover:underline" target="_blank">
-                            Terms of Service
-                          </a>{" "}
-                          and{" "}
-                          <a href="/privacy" className="text-primary hover:underline" target="_blank">
-                            HIPAA Notice
-                          </a>{" *"}
-                        </FormLabel>
-                        <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end pt-6">
+                {/* Navigation Buttons */}
+                <div className="flex justify-between pt-6 border-t border-warm-gray/20">
                   <Button
-                    type="submit"
-                    className="btn-primary"
-                    disabled={isSubmitting}
+                    type="button"
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                    className="btn-secondary"
                   >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Submitting Application...
-                      </>
-                    ) : (
-                      "Submit Application"
-                    )}
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Previous
                   </Button>
+
+                  {currentStep < totalSteps ? (
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      className="btn-primary"
+                    >
+                      Next
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      className="btn-primary"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                          Submitting Application...
+                        </>
+                      ) : (
+                        "Submit Application"
+                      )}
+                    </Button>
+                  )}
                 </div>
               </form>
             </Form>
