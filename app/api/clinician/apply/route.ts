@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
         }
       },
       licenses: {
-        L: licenseNumber.map((license: any) => ({
+        L: licenseNumber.map((license: { state: string; licenseNumber: string; expirationDate: string; docKey?: string }) => ({
           M: {
             state: { S: license.state },
             licenseNumber: { S: license.licenseNumber },
@@ -177,3 +177,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

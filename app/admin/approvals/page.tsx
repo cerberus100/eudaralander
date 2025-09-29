@@ -28,8 +28,6 @@ interface ClinicianApplication {
 export default function AdminApprovals() {
   const [applications, setApplications] = useState<ClinicianApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedApp, setSelectedApp] = useState<ClinicianApplication | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -267,3 +265,4 @@ export default function AdminApprovals() {
     </div>
   );
 }
+

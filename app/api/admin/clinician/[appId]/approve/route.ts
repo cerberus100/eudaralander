@@ -48,7 +48,7 @@ export async function POST(
 
     // Get the allowed states from licenses
     const licenses = app.licenses?.L || [];
-    const allowedStates = licenses.map((license: any) => license.M?.state?.S).filter(Boolean);
+    const allowedStates = licenses.map((license: { M?: { state?: { S?: string } } }) => license.M?.state?.S).filter((state): state is string => Boolean(state));
 
     // Update application status to APPROVED
     const updateCommand = new UpdateItemCommand({
@@ -80,10 +80,10 @@ export async function POST(
       allowedStates: { SS: allowedStates },
       profile: {
         M: {
-          fullName: app.identity?.M?.fullName,
-          email: app.identity?.M?.email,
-          phone: app.identity?.M?.phone,
-          npi: app.identity?.M?.npi,
+          fullName: app.identity?.M?.fullName || { S: '' },
+          email: app.identity?.M?.email || { S: '' },
+          phone: app.identity?.M?.phone || { S: '' },
+          npi: app.identity?.M?.npi || { S: '' },
         }
       },
       createdAt: { S: new Date().toISOString() },
@@ -111,8 +111,8 @@ export async function POST(
           M: {
             appId: { S: appId },
             userId: { S: userId },
-            clinicianName: app.identity?.M?.fullName,
-            clinicianEmail: app.identity?.M?.email,
+            clinicianName: app.identity?.M?.fullName || { S: '' },
+            clinicianEmail: app.identity?.M?.email || { S: '' },
             allowedStates: { SS: allowedStates },
           }
         },
@@ -139,3 +139,4 @@ export async function POST(
     );
   }
 }
+

@@ -79,8 +79,8 @@ export async function POST(
         metadata: {
           M: {
             appId: { S: appId },
-            clinicianName: app.identity?.M?.fullName,
-            clinicianEmail: app.identity?.M?.email,
+            clinicianName: app.identity?.M?.fullName || { S: '' },
+            clinicianEmail: app.identity?.M?.email || { S: '' },
           }
         },
         createdAt: { S: new Date().toISOString() },
@@ -104,3 +104,4 @@ export async function POST(
     );
   }
 }
+

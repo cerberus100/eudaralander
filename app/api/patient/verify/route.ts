@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       Item: {
         pk: { S: `AUDIT#${nanoid()}` },
         sk: { S: `TS#${new Date().toISOString()}` },
-        actorUserId: { S: user.pk.S.replace('USER#', '') },
+        actorUserId: { S: user.pk?.S?.replace('USER#', '') || 'unknown' },
         actorRole: { S: 'PATIENT' },
         action: { S: 'PATIENT_VERIFIED' },
         target: { S: 'USER' },

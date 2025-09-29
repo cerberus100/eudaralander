@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ const verifySchema = z.object({
 
 type VerifyFormData = z.infer<typeof verifySchema>;
 
-export default function VerifyPage() {
+function VerifyPageContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contact, setContact] = useState<string>("");
   const searchParams = useSearchParams();
@@ -94,7 +94,7 @@ export default function VerifyPage() {
       toast.success("Verification code resent!", {
         description: "Check your email or phone for the new code.",
       });
-    } catch (error) {
+    } catch {
       toast.error("Failed to resend code");
     }
   };
@@ -162,7 +162,7 @@ export default function VerifyPage() {
 
                   <div className="text-center">
                     <p className="text-sm text-foreground/60 mb-2">
-                      Didn't receive the code?
+                      Didn&apos;t receive the code?
                     </p>
                     <Button
                       type="button"
@@ -194,3 +194,12 @@ export default function VerifyPage() {
     </div>
   );
 }
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background py-16 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+      <VerifyPageContent />
+    </Suspense>
+  );
+}
+

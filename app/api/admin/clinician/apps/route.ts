@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         email: identity?.email?.S || '',
         phone: identity?.phone?.S || '',
         npi: identity?.npi?.S || '',
-        states: licenses.map((license: any) => license.M?.state?.S).filter(Boolean),
+        states: licenses.map((license: { M?: { state?: { S?: string } } }) => license.M?.state?.S).filter((state): state is string => Boolean(state)),
         specialties: flags?.specialties?.SS || [],
         pecosEnrolled: flags?.pecosEnrolled?.BOOL || false,
         documents: {
@@ -68,3 +68,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { ArrowLeft, ArrowRight, Upload, CheckCircle } from "lucide-react";
 
 const clinicianSchema = z.object({
   fullName: z.string().min(1, "Full name is required"),
@@ -20,6 +21,11 @@ const clinicianSchema = z.object({
   licenseNumber: z.string().min(1, "License number is required"),
   states: z.array(z.string()).min(1, "At least one state is required"),
   specialties: z.array(z.string()).min(1, "At least one specialty is required"),
+  documents: z.object({
+    malpracticeKey: z.string().optional(),
+    deaKey: z.string().optional(),
+    extras: z.array(z.string()).optional(),
+  }).optional(),
   consent: z.boolean().refine((val) => val === true, {
     message: "You must agree to the Terms & HIPAA Notice"
   }),
@@ -86,10 +92,6 @@ export default function ClinicianSignup() {
     }
   };
 
-  const canProceedToNextStep = () => {
-    // Basic validation - in a real app, you'd validate the current step's fields
-    return true;
-  };
 
   const form = useForm<ClinicianFormData>({
     resolver: zodResolver(clinicianSchema),

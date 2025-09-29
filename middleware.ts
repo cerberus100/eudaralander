@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Define protected routes and their required roles
-const ROLE_PROTECTION = {
+const ROLE_PROTECTION: Record<string, string[]> = {
   '/admin': ['ADMIN'],
   '/admin/approvals': ['ADMIN'],
   '/portal': ['PATIENT'],
   '/clinician': ['CLINICIAN'],
   '/onboarding': ['PATIENT', 'CLINICIAN'], // Allow both during onboarding
-} as const;
+};
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -89,3 +89,4 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.).*)',
   ],
 };
+
