@@ -110,7 +110,7 @@ aws s3api put-bucket-lifecycle-configuration \
     --bucket $S3_BUCKET_NAME \
     --lifecycle-configuration '{
         "Rules": [{
-            "Id": "DeleteOldDocuments",
+            "ID": "DeleteOldDocuments",
             "Status": "Enabled",
             "Prefix": "clinician-documents/",
             "Expiration": {
