@@ -27,7 +27,7 @@ export default function Contact() {
 
   const fetchMappings = async () => {
     try {
-      const response = await fetch('/api/admin/mappings');
+      const response = await fetch('/api/admin/mappings', { next: { revalidate: 3600 } });
       if (response.ok) {
         const data = await response.json();
         setSectionMappings(data);

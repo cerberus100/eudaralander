@@ -565,6 +565,10 @@ export default function Admin() {
                         fill
                         className="object-cover select-none pointer-events-none"
                         sizes="(max-width: 1024px) 50vw, 16vw"
+                        quality={75}
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                       />
                       {/* Delete button */}
                       <button
@@ -633,7 +637,7 @@ export default function Admin() {
                     >
                       {sectionMappings.hero?.images[0] ? (
                         <>
-                          <Image
+                          <Image quality={75} loading="lazy"
                             src={sectionMappings.hero.images[0]}
                             alt="Hero image"
                             fill
@@ -687,7 +691,7 @@ export default function Admin() {
                             onDragLeave={handleSectionDragLeave}
                           >
                             {sectionMappings[step.key]?.images[0] ? (
-                              <Image
+                              <Image quality={75} loading="lazy"
                                 src={sectionMappings[step.key].images[0]}
                                 alt={`${step.title} icon`}
                                 width={32}
@@ -733,7 +737,7 @@ export default function Admin() {
                   >
                     {sectionMappings['patients-hero']?.images[0] ? (
                       <>
-                        <Image
+                        <Image quality={75} loading="lazy"
                           src={sectionMappings['patients-hero'].images[0]}
                           alt="For Patients hero image"
                           fill
@@ -784,7 +788,7 @@ export default function Admin() {
                   >
                     {sectionMappings['clinicians-hero']?.images[0] ? (
                       <>
-                        <Image
+                        <Image quality={75} loading="lazy"
                           src={sectionMappings['clinicians-hero'].images[0]}
                           alt="For Clinicians hero image"
                           fill
@@ -835,7 +839,7 @@ export default function Admin() {
                   >
                     {sectionMappings['howitworks-hero']?.images[0] ? (
                         <>
-                          <Image
+                          <Image quality={75} loading="lazy"
                             src={sectionMappings['howitworks-hero'].images[0]}
                             alt="How It Works hero image"
                             fill
@@ -886,7 +890,7 @@ export default function Admin() {
                   >
                     {sectionMappings['contact-hero']?.images[0] ? (
                       <>
-                        <Image
+                        <Image quality={75} loading="lazy"
                           src={sectionMappings['contact-hero'].images[0]}
                           alt="Contact hero image"
                           fill

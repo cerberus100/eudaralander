@@ -28,7 +28,9 @@ export default function Home() {
 
   const fetchMappings = async () => {
     try {
-      const response = await fetch('/api/admin/mappings');
+      const response = await fetch('/api/admin/mappings', {
+        next: { revalidate: 3600 } // Cache for 1 hour
+      });
       if (response.ok) {
         const data = await response.json();
         setSectionMappings(data);
