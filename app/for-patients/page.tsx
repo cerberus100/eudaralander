@@ -6,40 +6,13 @@ import { Container } from "@/components/container";
 import { Section } from "@/components/section";
 import { HeroMedia } from "@/components/hero-media";
 import { content } from "@/lib/content";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-interface SectionMapping {
-  [key: string]: {
-    title: string;
-    images: string[];
-    content: string;
-    editable: boolean;
-  };
-}
 
 export default function ForPatients() {
   const { patients } = content;
-  const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
   const router = useRouter();
-
-  useEffect(() => {
-    fetchMappings();
-  }, []);
-
-  const fetchMappings = async () => {
-    try {
-      const response = await fetch('/api/admin/mappings', { next: { revalidate: 3600 } });
-      if (response.ok) {
-        const data = await response.json();
-        setSectionMappings(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch mappings:', error);
-    }
-  };
-
-  const heroImage = sectionMappings['patients-hero']?.images[0] || content.theme.images.hero;
+  const heroImage = content.theme.images.hero;
 
   return (
     <div>
