@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
+import { sendClinicianDenialEmail } from '@/lib/email-notifications';
 
 // Initialize DynamoDB client
 const dynamodb = new DynamoDBClient({
@@ -89,11 +90,16 @@ export async function POST(
 
     await dynamodb.send(auditCommand);
 
-    // In production, send denial email
-    // TODO: Implement SES email with polite denial message
+    // Send denial email to clinician
+    await sendClinicianDenialEmail({
+      fullName: app.identity?.M?.fullName?.S || '',
+      email: app.identity?.M?.email?.S || '',
+      appId: appId,
+    });
 
     return NextResponse.json({
       success: true,
+      message: 'Clinician application denied. Notification email sent.',
     });
 
   } catch (error) {

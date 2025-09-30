@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
 import { syncClinicianToMainApp } from '@/lib/sync-to-main-app';
+import { sendClinicianApprovalEmail } from '@/lib/email-notifications';
 
 // Initialize DynamoDB client
 const dynamodb = new DynamoDBClient({
@@ -137,6 +138,13 @@ export async function POST(
       specialties: app.flags?.M?.specialties?.SS || [],
     };
 
+    // Send approval email to clinician
+    await sendClinicianApprovalEmail({
+      fullName: app.identity?.M?.fullName?.S || '',
+      email: app.identity?.M?.email?.S || '',
+      appId: appId,
+    });
+
     // Sync to main app (non-blocking)
     syncClinicianToMainApp(clinicianData).catch((err) => {
       console.error('Failed to sync clinician to main app:', err);
@@ -148,7 +156,7 @@ export async function POST(
       success: true,
       userId: userId,
       allowedStates: allowedStates,
-      message: 'Clinician approved! Invitation sent to main app.',
+      message: 'Clinician approved! Invitation email sent.',
     });
 
   } catch (error) {

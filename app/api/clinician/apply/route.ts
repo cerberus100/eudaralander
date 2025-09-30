@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
+import { sendAdminNotification } from '@/lib/email-notifications';
 
 // Initialize DynamoDB client
 const dynamodb = new DynamoDBClient({
@@ -156,17 +157,21 @@ export async function POST(request: NextRequest) {
 
     await dynamodb.send(auditCommand);
 
-    // In development, log the application
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Clinician application submitted:', { appId, fullName, email });
-    } else {
-      // In production, send SES email confirmation
-      // TODO: Implement SES email sending
-    }
+    // Send email notification to admin for review
+    await sendAdminNotification({
+      clinicianName: fullName,
+      email: email,
+      npi: npi,
+      states: states,
+      specialties: specialties,
+      appId: appId,
+      submittedAt: new Date().toISOString(),
+    });
 
     // Return success with application ID
     return NextResponse.json({
       appId: appId,
+      message: 'Application submitted successfully! Our team will review your credentials and contact you within 2-3 business days.',
     });
 
   } catch (error) {
