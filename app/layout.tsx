@@ -9,6 +9,8 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: 'swap',
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -65,7 +67,9 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <link rel="preload" as="image" href="/images/1758654157534-ChatGPT Image Sep 23, 2025, 12_02_31 PM.jpg" />
       </head>
       <body className={`${inter.variable} antialiased font-sans bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen`}>
         <Navbar

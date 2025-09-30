@@ -15,6 +15,30 @@ frontend:
     paths:
       - node_modules/**/*
       - .next/cache/**/*
+      - public/.next/static/**/*
+
+# Enable custom headers for caching
+customHeaders:
+  - pattern: '**/*.jpg'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
+  - pattern: '**/*.jpeg'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
+  - pattern: '**/*.png'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
+  - pattern: '**/*.webp'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
+  - pattern: '**/*.avif'
+    headers:
+      - key: 'Cache-Control'
+        value: 'public, max-age=31536000, immutable'
 
 # Environment variables
 environmentVariables:

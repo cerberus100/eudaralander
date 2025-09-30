@@ -18,6 +18,9 @@ export function HeroMedia({ imageSrc, imageAlt, className, priority = false }: H
           fill
           className="object-cover transition-transform duration-700 hover:scale-105"
           priority={priority}
+          quality={85}
+          loading={priority ? "eager" : "lazy"}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
           unoptimized={imageSrc.endsWith('.svg')}
         />
       </div>

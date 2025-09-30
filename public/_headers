@@ -1,0 +1,21 @@
+## Cache images for 1 year
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+  
+## Cache CSS and JS for 30 days
+/*.css
+  Cache-Control: public, max-age=2592000
+  
+/*.js
+  Cache-Control: public, max-age=2592000
+  
+## Preload critical resources
+/*
+  Link: </images/1758654157534-ChatGPT Image Sep 23, 2025, 12_02_31 PM.jpg>; rel=preload; as=image
+  
+## Security headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
