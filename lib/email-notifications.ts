@@ -1,4 +1,56 @@
 // Email notification system for admin alerts and user communications
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+
+// Initialize SES client
+const sesClient = new SESClient({
+  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
+  },
+});
+
+// Helper function to send email via SES
+async function sendEmail(to: string, subject: string, htmlBody: string, textBody: string) {
+  const fromEmail = process.env.EUDAURA_FROM_EMAIL || 'noreply@eudaura.com';
+  
+  try {
+    const command = new SendEmailCommand({
+      Source: fromEmail,
+      Destination: {
+        ToAddresses: [to],
+      },
+      Message: {
+        Subject: {
+          Data: subject,
+          Charset: 'UTF-8',
+        },
+        Body: {
+          Html: {
+            Data: htmlBody,
+            Charset: 'UTF-8',
+          },
+          Text: {
+            Data: textBody,
+            Charset: 'UTF-8',
+          },
+        },
+      },
+    });
+
+    const result = await sesClient.send(command);
+    console.log('✅ Email sent successfully:', result.MessageId);
+    return { success: true, messageId: result.MessageId };
+  } catch (error) {
+    console.error('❌ Failed to send email via SES:', error);
+    // Fallback to console logging in case SES fails
+    console.log('📧 EMAIL FALLBACK (SES failed):');
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Body: ${textBody}`);
+    return { success: false, error };
+  }
+}
 
 interface AdminNotificationData {
   clinicianName: string;
@@ -111,10 +163,13 @@ Application ID: ${data.appId}
       `
     };
 
-    // TODO: Replace with your actual email service (SES, SendGrid, etc.)
-    console.log('📧 Would send admin notification email:', emailPayload);
-    
-    return { success: true };
+    // Send via SES
+    return await sendEmail(
+      emailPayload.to,
+      emailPayload.subject,
+      emailPayload.html,
+      emailPayload.text
+    );
     
   } catch (error) {
     console.error('Failed to send admin notification:', error);
@@ -153,10 +208,63 @@ export async function sendClinicianApprovalEmail(data: ClinicianApprovalData) {
       return { success: true };
     }
 
-    // TODO: Replace with actual email service
-    console.log('📧 Would send clinician approval email to:', data.email);
-    
-    return { success: true };
+    // Send via SES
+    const emailPayload = {
+      to: data.email,
+      subject: `🎉 You're Approved to Join Eudaura!`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #556B4F; color: white; padding: 20px; text-align: center;">
+            <h1>🎉 Application Approved!</h1>
+          </div>
+          
+          <div style="padding: 20px;">
+            <p>Dear ${data.fullName},</p>
+            
+            <p>Congratulations! Your application to join the Eudaura network has been <strong>approved</strong>.</p>
+            
+            <div style="background: #f0f9f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #556B4F;">Next Steps:</h3>
+              <ol>
+                <li>Click the setup link below to create your account</li>
+                <li>Set your password and complete your profile</li>
+                <li>Start seeing patients on the platform</li>
+              </ol>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.MAIN_APP_URL || 'https://app.eudaura.com'}/onboarding/clinician?appId=${data.appId}" 
+                 style="background: #556B4F; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                Set Up Your Account →
+              </a>
+            </div>
+            
+            <p>Welcome to the Eudaura team!</p>
+            <p>The Eudaura Team</p>
+          </div>
+        </div>
+      `,
+      text: `Dear ${data.fullName},
+
+Congratulations! Your application to join the Eudaura network has been approved.
+
+Next Steps:
+1. Click the setup link below to create your account
+2. Set your password and complete your profile  
+3. Start seeing patients on the platform
+
+Setup Link: ${process.env.MAIN_APP_URL || 'https://app.eudaura.com'}/onboarding/clinician?appId=${data.appId}
+
+Welcome to the Eudaura team!
+The Eudaura Team`
+    };
+
+    return await sendEmail(
+      emailPayload.to,
+      emailPayload.subject,
+      emailPayload.html,
+      emailPayload.text
+    );
     
   } catch (error) {
     console.error('Failed to send clinician approval email:', error);
@@ -194,10 +302,54 @@ export async function sendClinicianDenialEmail(data: ClinicianDenialData) {
       return { success: true };
     }
 
-    // TODO: Replace with actual email service
-    console.log('📧 Would send clinician denial email to:', data.email);
-    
-    return { success: true };
+    // Send via SES
+    const emailPayload = {
+      to: data.email,
+      subject: `Update on Your Eudaura Application`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #f8f9fa; color: #333; padding: 20px; text-align: center;">
+            <h1>Application Update</h1>
+          </div>
+          
+          <div style="padding: 20px;">
+            <p>Dear ${data.fullName},</p>
+            
+            <p>Thank you for your interest in joining the Eudaura network.</p>
+            
+            <p>After careful review, we are unable to approve your application at this time.</p>
+            
+            ${data.reason ? `<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p><strong>Reason:</strong> ${data.reason}</p>
+            </div>` : ''}
+            
+            <p>You may reapply in the future if your circumstances change or if you have additional credentials to provide.</p>
+            
+            <p>Thank you for your interest in Eudaura.</p>
+            <p>The Eudaura Team</p>
+          </div>
+        </div>
+      `,
+      text: `Dear ${data.fullName},
+
+Thank you for your interest in joining the Eudaura network.
+
+After careful review, we are unable to approve your application at this time.
+
+${data.reason ? `Reason: ${data.reason}` : ''}
+
+You may reapply in the future if your circumstances change.
+
+Thank you for your interest in Eudaura.
+The Eudaura Team`
+    };
+
+    return await sendEmail(
+      emailPayload.to,
+      emailPayload.subject,
+      emailPayload.html,
+      emailPayload.text
+    );
     
   } catch (error) {
     console.error('Failed to send clinician denial email:', error);
