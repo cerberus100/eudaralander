@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
+import { syncClinicianToMainApp } from '@/lib/sync-to-main-app';
 
 // Initialize DynamoDB client
 const dynamodb = new DynamoDBClient({
@@ -122,13 +123,32 @@ export async function POST(
 
     await dynamodb.send(auditCommand);
 
-    // In production, send invitation email with magic link
-    // TODO: Implement SES email with magic link
+    // Sync clinician data to main app
+    const clinicianData = {
+      userId,
+      email: app.identity?.M?.email?.S || '',
+      phone: app.identity?.M?.phone?.S || '',
+      npi: app.identity?.M?.npi?.S || '',
+      profile: {
+        fullName: app.identity?.M?.fullName?.S || '',
+      },
+      allowedStates,
+      licenses: app.licenses?.L || [],
+      specialties: app.flags?.M?.specialties?.SS || [],
+    };
 
+    // Sync to main app (non-blocking)
+    syncClinicianToMainApp(clinicianData).catch((err) => {
+      console.error('Failed to sync clinician to main app:', err);
+      // Continue anyway - admin can manually sync later
+    });
+
+    // Return success
     return NextResponse.json({
       success: true,
       userId: userId,
       allowedStates: allowedStates,
+      message: 'Clinician approved! Invitation sent to main app.',
     });
 
   } catch (error) {

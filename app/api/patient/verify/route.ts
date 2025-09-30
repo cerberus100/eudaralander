@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, GetItemCommand, UpdateItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
+import { syncPatientToMainApp } from '@/lib/sync-to-main-app';
 
 // Initialize DynamoDB client
 const dynamodb = new DynamoDBClient({
@@ -127,10 +128,34 @@ export async function POST(request: NextRequest) {
 
     await dynamodb.send(auditCommand);
 
-    // Return success with redirect to onboarding
+    // Sync patient data to main app
+    const userId = user.pk?.S?.replace('USER#', '') || 'unknown';
+    const patientData = {
+      userId,
+      email: user.contact?.M?.email?.S || contact,
+      phone: user.contact?.M?.phone?.S,
+      profile: {
+        firstName: user.profile?.M?.firstName?.S || '',
+        lastName: user.profile?.M?.lastName?.S || '',
+        dob: user.profile?.M?.dob?.S || '',
+        address: user.profile?.M?.address?.M,
+        insurance: user.profile?.M?.insurance?.M,
+        preferredContact: user.profile?.M?.preferredContact?.S || 'email',
+      },
+    };
+
+    // Sync to main app (non-blocking)
+    syncPatientToMainApp(patientData).catch((err) => {
+      console.error('Failed to sync patient to main app:', err);
+      // Continue anyway - admin can manually sync later
+    });
+
+    // Return success with redirect to main app
+    const mainAppUrl = process.env.MAIN_APP_URL || 'https://app.eudaura.com';
     return NextResponse.json({
       success: true,
-      next: '/onboarding/patient',
+      next: `${mainAppUrl}/onboarding/patient?userId=${userId}`,
+      message: 'Account verified! Redirecting to complete your profile...',
     });
 
   } catch (error) {
