@@ -293,3 +293,4 @@ Your marketing site will:
 **No code changes needed on this marketing site - it's ready to go!**
 
 Just make sure your main app has the `/api/users/create` endpoint to receive the user data.
+
