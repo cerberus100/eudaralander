@@ -4,10 +4,10 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // Initialize S3 client (in production, use environment variables)
 const s3Client = new S3Client({
-  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
+  region: process.env.NEXT_PUBLIC_EUDAURA_AWS_REGION || 'us-east-1',
   credentials: {
-    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
+    accessKeyId: process.env.NEXT_PUBLIC_EUDAURA_AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.NEXT_PUBLIC_EUDAURA_AWS_SECRET_ACCESS_KEY || '',
   },
 });
 

@@ -6,10 +6,10 @@ import { sendClinicianApprovalEmail } from '@/lib/email-notifications';
 
 // Initialize DynamoDB client
 const dynamodb = new DynamoDBClient({
-  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
+  region: process.env.NEXT_PUBLIC_EUDAURA_AWS_REGION || 'us-east-1',
   credentials: {
-    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
+    accessKeyId: process.env.NEXT_PUBLIC_EUDAURA_AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.NEXT_PUBLIC_EUDAURA_AWS_SECRET_ACCESS_KEY || '',
   },
 });
 
