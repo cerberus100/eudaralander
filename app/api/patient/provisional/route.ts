@@ -3,12 +3,9 @@ import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { nanoid } from 'nanoid';
 
 // Initialize DynamoDB client
+// Use default AWS credential chain with IAM role
 const dynamodb = new DynamoDBClient({
-  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
-  },
+  region: 'us-east-1',
 });
 
 // Helper function to generate OTP
