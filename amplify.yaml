@@ -13,9 +13,8 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
       - .next/cache/**/*
-      - public/.next/static/**/*
+      - .npm/**/*
 
 # Enable custom headers for caching
 customHeaders:
