@@ -3,12 +3,9 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // Initialize S3 client (in production, use environment variables)
+// Use default AWS credential chain with IAM role
 const s3Client = new S3Client({
-  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
-  },
+  region: 'us-east-1',
 });
 
 // Allowed file types and their MIME types
