@@ -2,9 +2,13 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 // Initialize SES client
-// Use default AWS credential chain with IAM role
+// Initialize SES client with environment variables
 const sesClient = new SESClient({
-  region: 'us-east-1',
+  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
+  },
 });
 
 // Helper function to send email via SES
