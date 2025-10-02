@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
   },
   // Enable compression
   compress: true,
-  // Optimize output
-  output: 'standalone',
+  // Traditional Amplify Hosting (with API routes support)
+  // No output: export needed - keep API routes working
 };
 
 export default nextConfig;
