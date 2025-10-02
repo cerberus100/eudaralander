@@ -392,3 +392,5 @@ curl -X POST https://main.d28ow29ha3x2t5.amplifyapp.com/api/clinician/apply \
 **Questions?** Check the documentation files or review the implementation in the GitHub repo.
 
 **- Backend Development Team**
+
+
