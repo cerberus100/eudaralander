@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-// Initialize S3 client (in production, use environment variables)
-// Use default AWS credential chain with IAM role
+// Initialize S3 client with environment variables
 const s3Client = new S3Client({
-  region: 'us-east-1',
+  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
+  },
 });
 
 // Allowed file types and their MIME types
