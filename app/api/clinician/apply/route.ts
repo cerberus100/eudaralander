@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
               }
             }
           }),
-          modalities: { SS: flags?.modalities || [] },
+          ...(flags?.modalities && flags.modalities.length > 0 && { modalities: { SS: flags.modalities } }),
           specialties: { SS: specialties },
         }
       },
