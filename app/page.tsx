@@ -2,15 +2,45 @@
 
 import { Container } from "@/components/container";
 import { HeroMedia } from "@/components/hero-media";
+import { LoadingSkeleton } from "@/components/ui/loading";
 import { content } from "@/lib/content";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+interface SectionMapping {
+  [key: string]: {
+    title: string;
+    images: string[];
+    content: string;
+    editable: boolean;
+  };
+}
 
 export default function Home() {
   const { home } = content;
+  const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
+  const [isLoadingImages, setIsLoadingImages] = useState(true);
   const router = useRouter();
-  
-  // Use static default image immediately for instant loading
-  const heroImage = content.theme.images.hero;
+
+  useEffect(() => {
+    fetchMappings();
+  }, []);
+
+  const fetchMappings = async () => {
+    try {
+      const response = await fetch('/api/admin/mappings');
+      if (response.ok) {
+        const data = await response.json();
+        setSectionMappings(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch mappings:', error);
+    } finally {
+      setIsLoadingImages(false);
+    }
+  };
+
+  const heroImage = sectionMappings.hero?.images[0] || content.theme.images.hero;
 
   return (
     <div>
@@ -36,11 +66,15 @@ export default function Home() {
               </div>
             </div>
             <div className="relative">
-              <HeroMedia
-                imageSrc={heroImage}
-                imageAlt="Healthcare professionals providing care"
-                priority={true}
-              />
+              {isLoadingImages ? (
+                <LoadingSkeleton className="aspect-[4/3] rounded-3xl" />
+              ) : (
+                <HeroMedia
+                  imageSrc={heroImage}
+                  imageAlt="Healthcare professionals providing care"
+                  priority={true}
+                />
+              )}
             </div>
           </div>
         </Container>
