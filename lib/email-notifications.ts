@@ -80,7 +80,7 @@ interface ClinicianDenialData {
  */
 export async function sendAdminNotification(data: AdminNotificationData) {
   const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@eudaura.com';
-  const marketingSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://main.d28ow29ha3x2t5.amplifyapp.com';
+  const marketingSiteUrl = process.env.SITE_URL || 'https://main.d28ow29ha3x2t5.amplifyapp.com';
   
   try {
     // In development, log to console
