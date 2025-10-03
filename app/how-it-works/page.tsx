@@ -5,40 +5,14 @@ import { Section } from "@/components/section";
 import { HeroMedia } from "@/components/hero-media";
 import { FAQ } from "@/components/faq";
 import { content } from "@/lib/content";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-interface SectionMapping {
-  [key: string]: {
-    title: string;
-    images: string[];
-    content: string;
-    editable: boolean;
-  };
-}
 
 export default function HowItWorks() {
   const { howItWorks } = content;
-  const [sectionMappings, setSectionMappings] = useState<SectionMapping>({});
   const router = useRouter();
 
-  useEffect(() => {
-    fetchMappings();
-  }, []);
-
-  const fetchMappings = async () => {
-    try {
-      const response = await fetch('/api/admin/mappings');
-      if (response.ok) {
-        const data = await response.json();
-        setSectionMappings(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch mappings:', error);
-    }
-  };
-
-  const heroImage = sectionMappings['howitworks-hero']?.images[0] || content.theme.images.hero;
+  // Use a fallback image that exists in the public folder
+  const heroImage = "/images/1758607221839-eudara.jpg";
 
   return (
     <div>
