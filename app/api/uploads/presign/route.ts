@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-// Initialize S3 client (in production, use environment variables)
+// Initialize S3 client with environment variables
 const s3Client = new S3Client({
   region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
   credentials: {

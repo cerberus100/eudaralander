@@ -16,8 +16,18 @@ const nextConfig: NextConfig = {
   },
   // Enable compression
   compress: true,
-  // Optimize output
+  // Back to Amplify Web Compute with environment variable fix
   output: 'standalone',
+  
+  // Ensure environment variables are properly injected
+  env: {
+    EUDAURA_AWS_REGION: process.env.EUDAURA_AWS_REGION,
+    EUDAURA_AWS_ACCESS_KEY_ID: process.env.EUDAURA_AWS_ACCESS_KEY_ID,
+    EUDAURA_AWS_SECRET_ACCESS_KEY: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY,
+    S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
+    SEED_ADMIN_EMAIL: process.env.SEED_ADMIN_EMAIL,
+    EUDAURA_FROM_EMAIL: process.env.EUDAURA_FROM_EMAIL,
+  },
 };
 
 export default nextConfig;

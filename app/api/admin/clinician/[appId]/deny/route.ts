@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import { sendClinicianDenialEmail } from '@/lib/email-notifications';
 
 // Initialize DynamoDB client
+// Initialize DynamoDB client with environment variables
 const dynamodb = new DynamoDBClient({
   region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
   credentials: {

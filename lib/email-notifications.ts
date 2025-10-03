@@ -2,6 +2,7 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 // Initialize SES client
+// Initialize SES client with environment variables
 const sesClient = new SESClient({
   region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
   credentials: {

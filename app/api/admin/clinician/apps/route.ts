@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 
 // Initialize DynamoDB client
+// Initialize DynamoDB client with environment variables
 const dynamodb = new DynamoDBClient({
   region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
   credentials: {
