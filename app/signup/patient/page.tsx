@@ -109,7 +109,7 @@ export default function PatientSignup() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/patient/provisional', {
+      const response = await fetch('https://eudaura.com/api/patient/provisional', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

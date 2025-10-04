@@ -46,7 +46,7 @@ function VerifyPageContent() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/patient/verify', {
+      const response = await fetch('https://eudaura.com/api/patient/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

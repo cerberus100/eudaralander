@@ -35,7 +35,7 @@ export default function AdminApprovals() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch('/api/admin/clinician/apps?status=SUBMITTED');
+      const response = await fetch('https://eudaura.com/api/admin/clinician/apps?status=SUBMITTED');
       if (response.ok) {
         const data = await response.json();
         setApplications(data);
@@ -55,7 +55,7 @@ export default function AdminApprovals() {
     }
 
     try {
-      const response = await fetch(`/api/admin/clinician/${appId}/approve`, {
+      const response = await fetch(`https://eudaura.com/api/admin/clinician/${appId}/approve`, {
         method: 'POST',
       });
 
@@ -80,7 +80,7 @@ export default function AdminApprovals() {
     }
 
     try {
-      const response = await fetch(`/api/admin/clinician/${appId}/deny`, {
+      const response = await fetch(`https://eudaura.com/api/admin/clinician/${appId}/deny`, {
         method: 'POST',
       });
 

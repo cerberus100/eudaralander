@@ -106,7 +106,7 @@ export default function ClinicianSignup() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/clinician/apply', {
+      const response = await fetch('https://eudaura.com/api/clinician/apply', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -338,7 +338,7 @@ export default function ClinicianSignup() {
                               if (!file) return;
 
                               try {
-                                const { url, key } = await fetch('/api/uploads/presign', {
+                                const { url, key } = await fetch('https://eudaura.com/api/uploads/presign', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({
@@ -383,7 +383,7 @@ export default function ClinicianSignup() {
                               if (!file) return;
 
                               try {
-                                const { url, key } = await fetch('/api/uploads/presign', {
+                                const { url, key } = await fetch('https://eudaura.com/api/uploads/presign', {
                                   method: 'POST',
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({
