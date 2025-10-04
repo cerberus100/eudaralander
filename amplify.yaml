@@ -15,6 +15,7 @@ frontend:
     paths:
       - .next/cache/**/*
       - .npm/**/*
+  platform: WEB_COMPUTE
 
 # Enable custom headers for caching
 customHeaders:

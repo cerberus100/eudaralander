@@ -16,8 +16,6 @@ const nextConfig: NextConfig = {
   },
   // Enable compression
   compress: true,
-  // Back to Amplify Web Compute with environment variable fix
-  output: 'standalone',
   
   // Ensure environment variables are properly injected
   env: {
