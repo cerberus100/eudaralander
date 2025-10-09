@@ -274,6 +274,65 @@ The Eudaura Team`
 }
 
 /**
+ * Send patient verification email with OTP code
+ */
+export async function sendPatientVerificationEmail(email: string, otp: string, firstName: string) {
+  try {
+    const emailPayload = {
+      to: email,
+      subject: `🔑 Your Eudaura Verification Code`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #556B4F; color: white; padding: 20px; text-align: center;">
+            <h1>Welcome to Eudaura!</h1>
+          </div>
+          
+          <div style="padding: 20px;">
+            <p>Hi ${firstName},</p>
+            
+            <p>Thank you for registering with Eudaura. To verify your email address, please use the following code:</p>
+            
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+              <h2 style="font-size: 32px; letter-spacing: 8px; color: #556B4F; margin: 0;">${otp}</h2>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">
+              This code will expire in <strong>5 minutes</strong>.<br>
+              If you didn't request this code, please ignore this email.
+            </p>
+            
+            <p>Welcome to the Eudaura community!</p>
+            <p>The Eudaura Team</p>
+          </div>
+        </div>
+      `,
+      text: `Hi ${firstName},
+
+Thank you for registering with Eudaura. To verify your email address, please use the following code:
+
+${otp}
+
+This code will expire in 5 minutes.
+If you didn't request this code, please ignore this email.
+
+Welcome to the Eudaura community!
+The Eudaura Team`
+    };
+
+    return await sendEmail(
+      emailPayload.to,
+      emailPayload.subject,
+      emailPayload.html,
+      emailPayload.text
+    );
+    
+  } catch (error) {
+    console.error('Failed to send patient verification email:', error);
+    return { success: false, error };
+  }
+}
+
+/**
  * Send denial notification to clinician
  */
 export async function sendClinicianDenialEmail(data: ClinicianDenialData) {
