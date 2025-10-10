@@ -165,14 +165,18 @@ export default function PatientSignup() {
         throw new Error(error.error || 'Failed to submit form');
       }
 
-      await response.json();
+      const result = await response.json();
+
+      // Save requestId for verification
+      localStorage.setItem('verificationRequestId', result.requestId);
+      localStorage.setItem('verificationContact', data.preferredContact === "email" ? data.email : data.phone!);
 
       toast.success("Account created successfully!", {
         description: "We've sent a verification code to your " + (data.preferredContact === "email" ? "email" : "phone"),
       });
 
       const contact = data.preferredContact === "email" ? data.email : data.phone;
-      router.push(`/verify?contact=${encodeURIComponent(contact!)}`);
+      router.push(`/verify?contact=${encodeURIComponent(contact!)}&requestId=${encodeURIComponent(result.requestId)}`);
     } catch (error) {
       console.error('Form submission error:', error);
       toast.error("Failed to create account", {

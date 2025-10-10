@@ -20,13 +20,34 @@ type VerifyFormData = z.infer<typeof verifySchema>;
 function VerifyPageContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contact, setContact] = useState<string>("");
+  const [requestId, setRequestId] = useState<string>("");
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
     const contactParam = searchParams.get('contact');
+    const requestIdParam = searchParams.get('requestId');
+    
+    // Try URL params first
     if (contactParam) {
       setContact(contactParam);
+    }
+    if (requestIdParam) {
+      setRequestId(requestIdParam);
+    }
+    
+    // Fallback to localStorage if not in URL
+    if (!requestIdParam) {
+      const savedRequestId = localStorage.getItem('verificationRequestId');
+      if (savedRequestId) {
+        setRequestId(savedRequestId);
+      }
+    }
+    if (!contactParam) {
+      const savedContact = localStorage.getItem('verificationContact');
+      if (savedContact) {
+        setContact(savedContact);
+      }
     }
   }, [searchParams]);
 
@@ -38,8 +59,9 @@ function VerifyPageContent() {
   });
 
   const onSubmit = async (data: VerifyFormData) => {
-    if (!contact) {
-      toast.error("Missing contact information");
+    if (!requestId) {
+      toast.error("Missing verification information. Please register again.");
+      router.push('/signup/patient');
       return;
     }
 
@@ -52,7 +74,7 @@ function VerifyPageContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          contact,
+          requestId,  // Changed from contact to requestId
           code: data.code,
         }),
       });
@@ -69,14 +91,30 @@ function VerifyPageContent() {
           description: "Your account has been activated.",
         });
 
+        // Clear localStorage
+        localStorage.removeItem('verificationRequestId');
+        localStorage.removeItem('verificationContact');
+
         // Redirect to onboarding
         router.push(result.next);
       }
     } catch (error) {
       console.error('Verification error:', error);
-      toast.error("Verification failed", {
-        description: error instanceof Error ? error.message : "Please check your code and try again",
-      });
+      const errorMessage = error instanceof Error ? error.message : "Please check your code and try again";
+      
+      if (errorMessage.includes("expired")) {
+        toast.error("Verification code expired", {
+          description: "Your code has expired. Please register again to receive a new code.",
+          action: {
+            label: "Register Again",
+            onClick: () => router.push('/signup/patient')
+          }
+        });
+      } else {
+        toast.error("Verification failed", {
+          description: errorMessage,
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -89,13 +127,32 @@ function VerifyPageContent() {
     }
 
     try {
-      // For now, just show a message that the code was resent
-      // In a real implementation, you'd call an API to resend the OTP
-      toast.success("Verification code resent!", {
-        description: "Check your email or phone for the new code.",
+      const response = await fetch('https://eudaura.com/api/patient/resend-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          contact: contact || '',  // Keep contact for email resend
+          requestId: requestId  // Add requestId for future use
+        }),
       });
-    } catch {
-      toast.error("Failed to resend code");
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to resend code');
+      }
+
+      const result = await response.json();
+      
+      toast.success("Verification code resent!", {
+        description: `Check your ${contact.includes('@') ? 'email' : 'phone'} for the new code.`,
+      });
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      toast.error("Failed to resend code", {
+        description: error instanceof Error ? error.message : "Please try again later",
+      });
     }
   };
 
@@ -107,7 +164,11 @@ function VerifyPageContent() {
             Verify Your Account
           </h1>
           <p className="text-foreground/70">
-            Enter the 6-digit code sent to <strong>{contact}</strong>
+            {contact ? (
+              <>Enter the 6-digit code sent to <strong>{contact}</strong></>
+            ) : (
+              <>Enter the 6-digit verification code from your email</>
+            )}
           </p>
         </div>
 

@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { CheckCircle, XCircle, AlertCircle, ExternalLink } from "lucide-react";
 
@@ -28,6 +31,10 @@ interface ClinicianApplication {
 export default function AdminApprovals() {
   const [applications, setApplications] = useState<ClinicianApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [denyDialogOpen, setDenyDialogOpen] = useState(false);
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const [denyReason, setDenyReason] = useState('');
+  const [isDenying, setIsDenying] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -74,18 +81,34 @@ export default function AdminApprovals() {
     }
   };
 
-  const handleDeny = async (appId: string) => {
-    if (!confirm('Are you sure you want to deny this clinician application?')) {
+  const handleDenyClick = (appId: string) => {
+    setSelectedAppId(appId);
+    setDenyReason('');
+    setDenyDialogOpen(true);
+  };
+
+  const handleDenyConfirm = async () => {
+    if (!selectedAppId || !denyReason.trim()) {
+      toast.error('Please provide a reason for denial');
       return;
     }
 
+    setIsDenying(true);
+
     try {
-      const response = await fetch(`https://eudaura.com/api/admin/clinician/${appId}/deny`, {
+      const response = await fetch(`https://eudaura.com/api/admin/clinician/${selectedAppId}/deny`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reason: denyReason }),
       });
 
       if (response.ok) {
-        toast.success('Application denied');
+        toast.success('Application denied', {
+          description: 'The clinician has been notified of the decision.',
+        });
+        setDenyDialogOpen(false);
         await fetchApplications(); // Refresh the list
       } else {
         const error = await response.json();
@@ -96,6 +119,8 @@ export default function AdminApprovals() {
       toast.error('Failed to deny application', {
         description: error instanceof Error ? error.message : 'Please try again',
       });
+    } finally {
+      setIsDenying(false);
     }
   };
 
@@ -247,7 +272,7 @@ export default function AdminApprovals() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            onClick={() => handleDeny(app.appId)}
+                            onClick={() => handleDenyClick(app.appId)}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Deny
@@ -261,6 +286,53 @@ export default function AdminApprovals() {
             )}
           </CardContent>
         </Card>
+        
+        <Dialog open={denyDialogOpen} onOpenChange={setDenyDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Deny Application</DialogTitle>
+              <DialogDescription>
+                Please provide a reason for denying this clinician application. This will be sent to the applicant.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Label htmlFor="denial-reason" className="mb-2 block">
+                Reason for Denial
+              </Label>
+              <Textarea
+                id="denial-reason"
+                value={denyReason}
+                onChange={(e) => setDenyReason(e.target.value)}
+                placeholder="Please explain why the application is being denied..."
+                className="min-h-[100px]"
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDenyDialogOpen(false)}
+                disabled={isDenying}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDenyConfirm}
+                disabled={isDenying || !denyReason.trim()}
+              >
+                {isDenying ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    Denying...
+                  </>
+                ) : (
+                  'Confirm Denial'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Eudaura Verification Flow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #556B4F;
+        }
+        button {
+            background: #556B4F;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #445940;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        input {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+            margin-right: 10px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Eudaura Verification Flow</h1>
+        
+        <div class="step">
+            <h3>Step 1: Register Test Patient</h3>
+            <input type="email" id="testEmail" placeholder="your-email@example.com" value="">
+            <button onclick="registerPatient()">Register Patient</button>
+            <div id="registerResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Saved Verification Info</h3>
+            <div id="savedInfo" class="info">
+                <strong>RequestId:</strong> <span id="savedRequestId">Not yet registered</span><br>
+                <strong>Contact:</strong> <span id="savedContact">Not yet registered</span>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Enter Verification Code</h3>
+            <input type="text" id="verifyCode" placeholder="123456" maxlength="6" pattern="[0-9]{6}">
+            <button onclick="verifyCode()" id="verifyBtn" disabled>Verify Code</button>
+            <div id="verifyResult"></div>
+        </div>
+
+        <div class="step">
+            <h3>API Responses</h3>
+            <div id="apiResponses">
+                <p>API responses will appear here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRequestId = null;
+        let currentContact = null;
+
+        async function registerPatient() {
+            const email = document.getElementById('testEmail').value;
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+
+            const resultDiv = document.getElementById('registerResult');
+            const apiDiv = document.getElementById('apiResponses');
+            
+            resultDiv.innerHTML = '<p>Registering patient...</p>';
+            
+            const requestBody = {
+                firstName: "Test",
+                lastName: "User",
+                dob: "1990-01-01",
+                email: email,
+                phone: "+1234567890",
+                address: {
+                    address1: "123 Test St",
+                    city: "Test City",
+                    state: "CA",
+                    postalCode: "12345"
+                },
+                insurance: {
+                    hasInsurance: false
+                },
+                preferredContact: "email",
+                consent: true
+            };
+
+            try {
+                const response = await fetch('https://eudaura.com/api/patient/provisional', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                
+                apiDiv.innerHTML = '<h4>Registration Response:</h4><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+
+                if (response.ok) {
+                    currentRequestId = data.requestId;
+                    currentContact = data.contact;
+                    
+                    // Save to localStorage (like the real app)
+                    localStorage.setItem('verificationRequestId', currentRequestId);
+                    localStorage.setItem('verificationContact', currentContact);
+                    
+                    // Update UI
+                    document.getElementById('savedRequestId').textContent = currentRequestId;
+                    document.getElementById('savedContact').textContent = currentContact;
+                    document.getElementById('verifyBtn').disabled = false;
+                    
+                    resultDiv.innerHTML = '<p class="success">✅ Registration successful! Check your email for the verification code.</p>';
+                    resultDiv.innerHTML += '<p class="info">RequestId: <strong>' + currentRequestId + '</strong></p>';
+                } else {
+                    resultDiv.innerHTML = '<p class="error">❌ Registration failed: ' + (data.error || 'Unknown error') + '</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Error: ' + error.message + '</p>';
+                apiDiv.innerHTML += '<h4>Error:</h4><pre>' + error.message + '</pre>';
+            }
+        }
+
+        async function verifyCode() {
+            const code = document.getElementById('verifyCode').value;
+            if (!code || code.length !== 6) {
+                alert('Please enter a 6-digit code');
+                return;
+            }
+
+            if (!currentRequestId) {
+                alert('Please register first');
+                return;
+            }
+
+            const resultDiv = document.getElementById('verifyResult');
+            const apiDiv = document.getElementById('apiResponses');
+            
+            resultDiv.innerHTML = '<p>Verifying code...</p>';
+            
+            const requestBody = {
+                requestId: currentRequestId,  // Using requestId, not contact!
+                code: code
+            };
+
+            try {
+                const response = await fetch('https://eudaura.com/api/patient/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+                
+                apiDiv.innerHTML += '<h4>Verification Response:</h4><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = '<p class="success">✅ Verification successful!</p>';
+                    resultDiv.innerHTML += '<p class="info">Next: <a href="' + data.next + '" target="_blank">' + data.next + '</a></p>';
+                    
+                    // Clear localStorage (like the real app)
+                    localStorage.removeItem('verificationRequestId');
+                    localStorage.removeItem('verificationContact');
+                } else {
+                    resultDiv.innerHTML = '<p class="error">❌ Verification failed: ' + (data.error || 'Unknown error') + '</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p class="error">❌ Error: ' + error.message + '</p>';
+                apiDiv.innerHTML += '<h4>Error:</h4><pre>' + error.message + '</pre>';
+            }
+        }
+
+        // Check for saved data on load
+        window.onload = function() {
+            const savedRequestId = localStorage.getItem('verificationRequestId');
+            const savedContact = localStorage.getItem('verificationContact');
+            
+            if (savedRequestId && savedContact) {
+                currentRequestId = savedRequestId;
+                currentContact = savedContact;
+                document.getElementById('savedRequestId').textContent = savedRequestId;
+                document.getElementById('savedContact').textContent = savedContact;
+                document.getElementById('verifyBtn').disabled = false;
+                document.getElementById('testEmail').value = savedContact;
+            }
+        };
+    </script>
+</body>
+</html>
