@@ -26,20 +26,20 @@ function hashOTP(otp: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { contact, code } = await request.json();
+    const { requestId, code } = await request.json();
 
-    if (!contact || !code) {
+    if (!requestId || !code) {
       return NextResponse.json(
-        { error: 'Contact and code are required' },
+        { error: 'Request ID and code are required' },
         { status: 400 }
       );
     }
 
-    // Find user by contact (email or phone)
+    // Find user by requestId (userId from registration)
     const getCommand = new GetItemCommand({
       TableName: 'tele_users',
       Key: {
-        pk: { S: `USER#${contact}` },
+        pk: { S: `USER#${requestId}` },
         sk: { S: 'PROFILE' },
       },
     });
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     const updateCommand = new UpdateItemCommand({
       TableName: 'tele_users',
       Key: {
-        pk: { S: `USER#${contact}` },
+        pk: { S: `USER#${requestId}` },
         sk: { S: 'PROFILE' },
       },
       UpdateExpression: 'SET patientState = :state, updatedAt = :updatedAt REMOVE otp',
@@ -108,19 +108,22 @@ export async function POST(request: NextRequest) {
 
     await dynamodb.send(updateCommand);
 
+    // Get contact info for audit
+    const userEmail = user.contact?.M?.email?.S || 'unknown';
+
     // Write audit entry
     const auditCommand = new PutItemCommand({
       TableName: 'tele_audit',
       Item: {
         pk: { S: `AUDIT#${nanoid()}` },
         sk: { S: `TS#${new Date().toISOString()}` },
-        actorUserId: { S: user.pk?.S?.replace('USER#', '') || 'unknown' },
+        actorUserId: { S: requestId },
         actorRole: { S: 'PATIENT' },
         action: { S: 'PATIENT_VERIFIED' },
         target: { S: 'USER' },
         metadata: {
           M: {
-            contact: { S: contact },
+            contact: { S: userEmail },
           }
         },
         createdAt: { S: new Date().toISOString() },
@@ -130,10 +133,9 @@ export async function POST(request: NextRequest) {
     await dynamodb.send(auditCommand);
 
     // Sync patient data to main app
-    const userId = user.pk?.S?.replace('USER#', '') || 'unknown';
     const patientData = {
-      userId,
-      email: user.contact?.M?.email?.S || contact,
+      userId: requestId,
+      email: userEmail,
       phone: user.contact?.M?.phone?.S,
       profile: {
         firstName: user.profile?.M?.firstName?.S || '',
@@ -155,7 +157,7 @@ export async function POST(request: NextRequest) {
     const mainAppUrl = process.env.MAIN_APP_URL || 'https://app.eudaura.com';
     return NextResponse.json({
       success: true,
-      next: `${mainAppUrl}/onboarding/patient?userId=${userId}`,
+      next: `${mainAppUrl}/onboarding/patient?userId=${requestId}`,
       message: 'Account verified! Redirecting to complete your profile...',
     });
 

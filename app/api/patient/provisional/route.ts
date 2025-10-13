@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { nanoid } from 'nanoid';
+import { sendPatientVerificationEmail } from '@/lib/email-notifications';
 
 // Initialize DynamoDB client
 const dynamodb = new DynamoDBClient({
-  region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.EUDAURA_AWS_SECRET_ACCESS_KEY || '',
-  },
-});
-
-// Initialize SES client
-const sesClient = new SESClient({
   region: process.env.EUDAURA_AWS_REGION || 'us-east-1',
   credentials: {
     accessKeyId: process.env.EUDAURA_AWS_ACCESS_KEY_ID || '',
@@ -212,68 +203,18 @@ export async function POST(request: NextRequest) {
 
     await dynamodb.send(auditCommand);
 
-    // Send OTP via email
+    // Send OTP email via SES
     try {
-      const fromEmail = process.env.EUDAURA_FROM_EMAIL || 'noreply@eudaura.com';
-      
-      const emailCommand = new SendEmailCommand({
-        Source: fromEmail,
-        Destination: {
-          ToAddresses: [email],
-        },
-        Message: {
-          Subject: {
-            Data: 'Your Eudaura Verification Code',
-            Charset: 'UTF-8',
-          },
-          Body: {
-            Html: {
-              Data: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                  <div style="background: #556B4F; color: white; padding: 20px; text-align: center;">
-                    <h1>Verification Code</h1>
-                  </div>
-                  <div style="padding: 20px;">
-                    <p>Hi ${firstName},</p>
-                    <p>Welcome to Eudaura! Please use this verification code to complete your account setup:</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                      <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #556B4F;">
-                        ${otp}
-                      </div>
-                    </div>
-                    <p>This code will expire in 5 minutes.</p>
-                    <p>If you didn't request this, please ignore this email.</p>
-                    <p>Welcome to Eudaura!</p>
-                  </div>
-                </div>
-              `,
-              Charset: 'UTF-8',
-            },
-            Text: {
-              Data: `Hi ${firstName},
-
-Welcome to Eudaura! Please use this verification code to complete your account setup:
-
-${otp}
-
-This code will expire in 5 minutes.
-
-If you didn't request this, please ignore this email.
-
-Welcome to Eudaura!`,
-              Charset: 'UTF-8',
-            },
-          },
-        },
-      });
-
-      const emailResult = await sesClient.send(emailCommand);
-      console.log('✅ OTP email sent successfully:', emailResult.MessageId);
-      
+      await sendPatientVerificationEmail(email, otp, firstName);
+      console.log('✅ Verification email sent to:', email);
     } catch (emailError) {
-      console.error('❌ Failed to send OTP email:', emailError);
-      // Log OTP to console as fallback
-      console.log('📧 FALLBACK - OTP for', email, ':', otp);
+      console.error('❌ Failed to send verification email:', emailError);
+      // Continue anyway - user registered, but may need manual OTP retrieval
+    }
+
+    // Also log OTP in development for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔑 OTP for', email, ':', otp);
     }
 
     // Return success with user ID for verification
