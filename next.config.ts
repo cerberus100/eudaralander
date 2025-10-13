@@ -26,6 +26,42 @@ const nextConfig: NextConfig = {
     SEED_ADMIN_EMAIL: process.env.SEED_ADMIN_EMAIL,
     EUDAURA_FROM_EMAIL: process.env.EUDAURA_FROM_EMAIL,
   },
+  
+  // Add custom headers
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin'
+          }
+        ],
+      },
+      {
+        source: '/',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate'
+          }
+        ],
+      },
+    ]
+  },
 };
 
 export default nextConfig;

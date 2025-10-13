@@ -70,6 +70,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <link rel="preload" as="image" href="/images/1758654157534-ChatGPT Image Sep 23, 2025, 12_02_31 PM.jpg" />
+        <script src="/force-refresh.js"></script>
         <script src="/clear-sw.js" defer></script>
       </head>
       <body className={`${inter.variable} antialiased font-sans bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen`}>
